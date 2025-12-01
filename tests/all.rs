@@ -22,3 +22,14 @@ macro_rules! check {
 }
 
 check!(day01, Day1, 1177, 6768);
+check!(day02, Day2, "👻", "👻");
+// check!(day03, Day3, "👻", "👻");
+// check!(day04, Day4, "👻", "👻");
+// check!(day05, Day5, "👻", "👻");
+// check!(day06, Day6, "👻", "👻");
+// check!(day07, Day7, "👻", "👻");
+// check!(day08, Day8, "👻", "👻");
+// check!(day09, Day9, "👻", "👻");
+// check!(day10, Day10, "👻", "👻");
+// check!(day11, Day11, "👻", "👻");
+// check!(day12, Day12, "👻", "👻");

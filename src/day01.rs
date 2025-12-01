@@ -1,4 +1,4 @@
-use crate::{Checkable, Day};
+use crate::{Answer, Day};
 
 pub struct Day1 {}
 
@@ -9,7 +9,7 @@ enum Direction {
 }
 
 impl Day for Day1 {
-    fn part1(input: &str) -> impl Checkable {
+    fn part1(input: &str) -> impl Answer {
         let steps = parse(input);
         let mut curr = 50;
         let mut zeroes = 0;
@@ -27,7 +27,7 @@ impl Day for Day1 {
         zeroes
     }
 
-    fn part2(input: &str) -> impl Checkable {
+    fn part2(input: &str) -> impl Answer {
         let steps = parse(input);
         let mut curr = 50;
         let mut zeroes = 0;
@@ -38,7 +38,12 @@ impl Day for Day1 {
                 Direction::Right(c) => (c, 1),
             };
 
-            while c != 0 {
+            while c.abs() > 100 {
+                c -= 100 * by;
+                zeroes += 1;
+            }
+
+            while c.abs() > 0 {
                 curr += by;
                 c -= by;
 
@@ -57,8 +62,8 @@ fn parse(input: &str) -> Vec<Direction> {
         .trim()
         .lines()
         .map(|line| {
-            let (l, r) = line.split_at(1);
-            let r: isize = isize::from_str_radix(r, 10).expect("bad num");
+            let (l, r) = line.trim().split_at(1);
+            let r: isize = r.parse().expect("bad num");
             match l {
                 "L" => Direction::Left(r),
                 "R" => Direction::Right(r),
@@ -72,6 +77,17 @@ fn parse(input: &str) -> Vec<Direction> {
 mod test {
     use super::*;
 
+    const TEST_INPUT: &'static str = "L68
+    L30
+    R48
+    L5
+    R60
+    L55
+    L1
+    L99
+    R14
+    L82";
+
     #[test]
     fn p() {
         let steps = parse("L2\nR82\nL10");
@@ -83,5 +99,11 @@ mod test {
                 Direction::Left(10)
             ]
         );
+    }
+
+    #[test]
+    fn p2() {
+        let res = Day1::part2(TEST_INPUT);
+        assert_eq!(res.to_string(), "6");
     }
 }
