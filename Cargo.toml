@@ -1,0 +1,20 @@
+[package]
+name = "aoc25-rs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.94"
+flate2 = "1.0.35"
+nalgebra = "0.33.2"
+regex = "1.11.1"
+reqwest = { version = "0.12.9", features = ["blocking"] }
+tokio = "1.48.0"
+
+[profile.dev]
+opt-level = 1
+#debug = "full"
+
+[profile.release]
+opt-level = 3
+debug = "full"
