@@ -9,7 +9,11 @@ impl Day for Day2 {
         let ranges = parse(input);
         ranges
             .into_iter()
-            .flat_map(|r| collect_repeats(r, next_2_repeat))
+            .flat_map(|r| {
+                let mut h = HashSet::<u64>::new();
+                n_repeats(&r, 2, &mut h);
+                h
+            })
             .sum::<u64>()
     }
 
@@ -58,131 +62,67 @@ fn count_digits(i: u64) -> u64 {
     n
 }
 
-fn next_2_repeat(n: u64) -> u64 {
-    let digits = count_digits(n);
-
-    let (start, shift) = if digits.is_multiple_of(2) {
-        let fac = 10u64.pow(digits as u32 / 2);
-        (n / fac, fac)
-    } else {
-        return next_2_repeat(10u64.pow(digits as u32));
-    };
-
-    let mut attempt = start * shift + start;
-    // println!("{} => {} / {} / {} = {}", n, digits, start, shift, attempt);
-    while attempt < n {
-        attempt = next_2_repeat((start + 1) * shift + (start + 1));
-    }
-    attempt
+fn to_next_digit_count(n: u64) -> u64 {
+    let d = count_digits(n);
+    10u64.pow(d as u32)
 }
 
-fn collect_repeats<T: Fn(u64) -> u64>(r: RangeInclusive<u64>, strategy: T) -> Vec<u64> {
-    let mut rs = vec![];
+fn n_repeats(r: &RangeInclusive<u64>, repeats: u64, outs: &mut HashSet<u64>) {
+    let r1: u32 = repeats as u32 - 1;
+    let end = *r.end();
+    let mut check = *r.start();
 
-    // println!("searching {:?}", r);
+    while check <= end {
+        let d = count_digits(check);
 
-    let mut n = *r.start();
-    loop {
-        n = strategy(n);
-        if r.contains(&n) {
-            rs.push(n);
-        } else {
+        if !d.is_multiple_of(repeats) {
+            // not possible with this number of digits, jump ahead to the next
+            // power of 10
+            check = to_next_digit_count(check);
+            continue;
+        }
+
+        // factor is the 10^ size of our repeated segment
+        let factor = 10u64.pow((d / repeats) as u32);
+        // and base is the repeated segment we're looking for
+        let base = check / factor.pow(r1);
+
+        // so if we have 123456 and repeats = 3
+        // base = 12 and factor = 10^2
+
+        // now we repeatedly *factor+base, leaving us with e.g. 121212
+        // we preemptively compute our next check at the same time
+        let mut result = base;
+        let base1 = base + 1;
+        let mut next_result = base1;
+        for _ in 0..r1 {
+            result = result * factor + base;
+            next_result = next_result * factor + base1;
+        }
+
+        if result > end {
             break;
         }
-        println!("{}", n);
-        n += 1;
-    }
 
-    rs
+        // result is guaranteed a repeating number, just need to check it's big enough
+        if result >= check {
+            outs.insert(result);
+        }
+
+        // Continue with the next candidate
+        check = next_result;
+    }
 }
 
-/*
- *  Abandoned attempt that nearly worked - jumping straight to the next
- *  viable solution rather than searching. (It worked above for the 2-case.)
-*/
-
-// fn next_n_repeat(start: u64, r: &RangeInclusive<u64>, repeats: u64) -> Option<u64> {
-//     if !r.contains(&start) {
-//         return None;
-//     }
-
-//     let fac = (10 as u64).pow((count_digits(start) / repeats) as u32);
-//     let mut n = start;
-//     for _ in 0..(repeats - 1) {
-//         n /= fac;
-//     }
-//     dbg!(n, repeats);
-
-//     let mut res = n;
-//     for _ in 0..(repeats - 1) {
-//         res *= fac;
-//         res += n;
-//     }
-//     dbg!(res);
-
-//     if res < start {
-//         let next_start = {
-//             let mut s = n + 1;
-//             for _ in 0..(repeats - 1) {
-//                 s *= fac;
-//             }
-//             s
-//         };
-//         dbg!(next_start);
-//         return next_n_repeat(next_start, r, repeats);
-//     }
-
-//     if r.contains(&res) {
-//         return Some(res);
-//     }
-
-//     None
-// }
-
-fn n_repeats(r: &RangeInclusive<u64>, repeats: u64) -> Vec<u64> {
-    let mut outs: Vec<u64> = vec![];
-    let r1: u32 = repeats as u32 - 1;
-    for i in r.clone() {
-        let d = count_digits(i);
-        if !d.is_multiple_of(repeats) {
-            continue;
-        }
-        let fac = 10u64.pow((d / repeats) as u32);
-        let base = i / fac.pow(r1);
-
-        // quick check before full
-        if i % base != 0 {
-            continue;
-        }
-
-        let mut res = base;
-        for _ in 0..r1 {
-            res = res * fac + base
-        }
-        if res == i {
-            outs.push(i);
-        }
-    }
-
-    // dbg!(outs)
-    outs
-}
-
-fn any_repeats(r: RangeInclusive<u64>) -> Vec<u64> {
+fn any_repeats(r: RangeInclusive<u64>) -> impl IntoIterator<Item = u64> {
     let mut out = HashSet::<u64>::new();
 
     let digits = count_digits(*r.end());
     for ds in 2..=digits {
-        let rs = n_repeats(&r, ds);
-        for n in rs {
-            out.insert(n);
-        }
+        n_repeats(&r, ds, &mut out);
     }
 
-    let mut r: Vec<u64> = out.into_iter().collect();
-    r.sort();
-    // dbg!(r)
-    r
+    out
 }
 
 #[cfg(test)]
@@ -199,12 +139,6 @@ mod tests {
     }
 
     #[test]
-    fn nexts() {
-        assert_eq!(next_2_repeat(11), 11);
-        assert_eq!(next_2_repeat(12), 22);
-    }
-
-    #[test]
     fn digits() {
         assert_eq!(count_digits(99), 2);
         assert_eq!(count_digits(100), 3);
@@ -212,14 +146,20 @@ mod tests {
         assert_eq!(count_digits(99999), 5);
     }
 
+    fn run_n_repeats(r: RangeInclusive<u64>, repeats: u64) -> Vec<u64> {
+        let mut h = HashSet::<u64>::new();
+        n_repeats(&r, repeats, &mut h);
+
+        let mut v: Vec<u64> = h.into_iter().collect();
+        v.sort();
+        v
+    }
+
     #[test]
     fn repeats() {
-        assert_eq!(collect_repeats(95..=115, next_2_repeat), vec![99]);
-        assert_eq!(collect_repeats(998..=1012, next_2_repeat), vec![1010]);
-        assert_eq!(
-            collect_repeats(1188511880..=1188511890, next_2_repeat),
-            vec![1188511885]
-        );
+        assert_eq!(run_n_repeats(95..=115, 2), vec![99]);
+        assert_eq!(run_n_repeats(998..=1012, 2), vec![1010]);
+        assert_eq!(run_n_repeats(1188511880..=1188511890, 2), vec![1188511885]);
     }
 
     #[test]
@@ -227,17 +167,39 @@ mod tests {
         assert_eq!(Day2::part1(TEST_INPUT).to_string(), "1227775554");
     }
 
+    fn run_any_repeats(r: RangeInclusive<u64>) -> Vec<u64> {
+        let r = any_repeats(r);
+
+        let mut v: Vec<u64> = r.into_iter().collect();
+        v.sort();
+        v
+    }
+
     #[test]
     fn test_any_repeats() {
-        assert_eq!(any_repeats(11..=22), vec![11, 22]);
-        assert_eq!(any_repeats(998..=1012), vec![999, 1010]);
+        assert_eq!(run_any_repeats(11..=22), vec![11, 22]);
+        assert_eq!(run_any_repeats(998..=1012), vec![999, 1010]);
 
         assert_eq!(Day2::part2(TEST_INPUT).to_string(), "4174379265");
     }
 
     #[test]
     fn test_n_repeats() {
-        assert_eq!(n_repeats(&(998..=1012), 2), vec![1010]);
-        assert_eq!(n_repeats(&(998..=1012), 3), vec![999]);
+        let mut outs = HashSet::<u64>::new();
+        n_repeats(&(998..=1012), 2, &mut outs);
+
+        assert_eq!(outs.iter().cloned().collect::<Vec<_>>(), vec![1010]);
+        outs.clear();
+
+        n_repeats(&(998..=1012), 3, &mut outs);
+        assert_eq!(outs.iter().cloned().collect::<Vec<_>>(), vec![999]);
+    }
+
+    #[test]
+    fn test_to_next_digits() {
+        assert_eq!(to_next_digit_count(1), 10);
+        assert_eq!(to_next_digit_count(9), 10);
+        assert_eq!(to_next_digit_count(10), 100);
+        assert_eq!(to_next_digit_count(555), 1000);
     }
 }
