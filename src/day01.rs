@@ -106,4 +106,12 @@ mod test {
         let res = Day1::part2(TEST_INPUT);
         assert_eq!(res.to_string(), "6");
     }
+
+    #[test]
+    fn andrew_test() {
+        let input = std::fs::read_to_string("inputs/AB_1.txt").expect("Missing Input");
+        let res = Day1::part2(&input);
+
+        assert_eq!(res.to_string(), "💣");
+    }
 }
