@@ -10,8 +10,8 @@ pub use day01::Day1;
 mod day02;
 pub use day02::Day2;
 
-// mod day03;
-// pub use day03::Day3;
+mod day03;
+pub use day03::Day3;
 
 // mod day04;
 // pub use day04::Day4;
