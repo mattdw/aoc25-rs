@@ -23,7 +23,7 @@ impl Day for Day3 {
             .map(|line| {
                 let mut s = 0;
                 let mut last_loc = 0;
-                for i in (0..12).into_iter().rev() {
+                for i in (0..12).rev() {
                     let (loc, n) = max_in_slice(&line[last_loc..(line.len() - i)]);
                     s = s * 10 + n;
                     last_loc = last_loc + loc + 1;
@@ -53,7 +53,7 @@ fn max_in_slice(slice: &[Int]) -> (usize, Int) {
     // all Rust's iter::max(_by) let last equal element win;
     // we need the first
     let mut curr = (0, slice[0]);
-    for (idx, &val) in slice.into_iter().enumerate() {
+    for (idx, &val) in slice.iter().enumerate() {
         if val > curr.1 {
             curr = (idx, val);
         }

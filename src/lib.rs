@@ -13,8 +13,8 @@ pub use day02::Day2;
 mod day03;
 pub use day03::Day3;
 
-// mod day04;
-// pub use day04::Day4;
+mod day04;
+pub use day04::Day4;
 
 // mod day05;
 // pub use day05::Day5;

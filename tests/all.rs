@@ -24,7 +24,7 @@ macro_rules! check {
 check!(day01, Day1, 1177, 6768);
 check!(day02, Day2, 12850231731u64, 24774350322u64);
 check!(day03, Day3, 17554, 175053592950232u64);
-// check!(day04, Day4, "👻", "👻");
+check!(day04, Day4, 1428, 8936);
 // check!(day05, Day5, "👻", "👻");
 // check!(day06, Day6, "👻", "👻");
 // check!(day07, Day7, "👻", "👻");

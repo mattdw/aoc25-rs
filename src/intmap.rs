@@ -1,3 +1,5 @@
+use std::ops::{Add, Sub};
+
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct IntMap<T> {
     pub cells: Vec<T>,
@@ -59,9 +61,110 @@ impl<T: Default + Clone> IntMap<T> {
         self.cells.get(self.pt_to_idx(co) as usize)
     }
 
+    pub fn iter<'a>(&'a self) -> CoordIterator<'a, T> {
+        CoordIterator {
+            m: self,
+            x: 0,
+            y: 0,
+        }
+    }
+
     #[allow(dead_code)]
     pub fn set(&mut self, co: (isize, isize), val: T) {
         let idx = self.pt_to_idx(co);
         self.cells[idx as usize] = val;
+    }
+}
+
+pub struct CoordIterator<'a, T> {
+    m: &'a IntMap<T>,
+    x: isize,
+    y: isize,
+}
+
+impl<'a, T: Clone + Default> Iterator for CoordIterator<'a, T> {
+    type Item = (isize, isize);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.m.in_bounds((self.x, self.y)) {
+            let out = Some((self.x, self.y));
+            self.x += 1;
+            return out;
+        }
+
+        self.x = 0;
+        self.y += 1;
+
+        if self.m.in_bounds((self.x, self.y)) {
+            let out = Some((self.x, self.y));
+            self.x += 1;
+            return out;
+        }
+
+        None
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
+pub struct Coord<T> {
+    x: T,
+    y: T,
+}
+
+#[allow(unused)]
+impl<T> Coord<T>
+where
+    T: Copy,
+{
+    pub fn get(&self) -> (T, T) {
+        (self.x, self.y)
+    }
+
+    pub fn make(t: (T, T)) -> Self {
+        Self { x: t.0, y: t.1 }
+    }
+
+    pub fn xy(x: T, y: T) -> Self {
+        Self { x, y }
+    }
+}
+
+impl<T: Add<Output = T>> Add for Coord<T>
+where
+    T: Add + Copy,
+{
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Coord {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+impl<T: Sub<Output = T>> Sub for Coord<T>
+where
+    T: Sub + Copy,
+{
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Coord {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
+}
+
+impl<T> Default for Coord<T>
+where
+    T: Default,
+{
+    fn default() -> Self {
+        Self {
+            x: Default::default(),
+            y: Default::default(),
+        }
     }
 }
