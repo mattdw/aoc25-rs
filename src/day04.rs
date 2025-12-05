@@ -83,7 +83,7 @@ const NEIGHBOURS: [(isize, isize); 8] = [
 fn adjacent_cos(co: (isize, isize)) -> Vec<(isize, isize)> {
     NEIGHBOURS
         .iter()
-        .map(|n| (co.0 + n.0, co.1 + n.1))
+        .map(|n| (Coord::from(*n) + Coord::from(co)).into())
         .collect()
 }
 

@@ -7,9 +7,8 @@ pub struct IntMap<T> {
     pub height: usize,
 }
 
-#[expect(unused)]
+#[allow(unused)]
 impl<T: Default + Clone> IntMap<T> {
-    #[allow(dead_code)]
     pub fn new(width: usize, height: usize) -> IntMap<T> {
         let cells = vec![T::default(); width * height];
         IntMap {
@@ -43,7 +42,7 @@ impl<T: Default + Clone> IntMap<T> {
     }
 
     pub fn in_bounds(&self, co: (isize, isize)) -> bool {
-        0 <= co.0 && co.0 < self.width as isize && 0 <= co.1 && co.1 < self.height as isize
+        (0..self.width).contains(&(co.0 as usize)) && (0..self.height).contains(&(co.1 as usize))
     }
 
     pub fn pt_to_idx(&self, co: (isize, isize)) -> isize {
@@ -120,12 +119,24 @@ where
         (self.x, self.y)
     }
 
-    pub fn make(t: (T, T)) -> Self {
+    pub fn wrap(t: (T, T)) -> Self {
         Self { x: t.0, y: t.1 }
     }
 
     pub fn xy(x: T, y: T) -> Self {
         Self { x, y }
+    }
+}
+
+impl<T> From<(T, T)> for Coord<T> {
+    fn from(t: (T, T)) -> Self {
+        Self { x: t.0, y: t.1 }
+    }
+}
+
+impl<T> From<Coord<T>> for (T, T) {
+    fn from(t: Coord<T>) -> (T, T) {
+        (t.x, t.y)
     }
 }
 
