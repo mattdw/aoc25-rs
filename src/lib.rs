@@ -1,3 +1,5 @@
+#![feature(get_disjoint_mut_helpers)]
+
 use reqwest::header::COOKIE;
 use std::{env, fmt::Display};
 
@@ -16,8 +18,8 @@ pub use day03::Day3;
 mod day04;
 pub use day04::Day4;
 
-// mod day05;
-// pub use day05::Day5;
+mod day05;
+pub use day05::Day5;
 
 // mod day06;
 // pub use day06::Day6;
