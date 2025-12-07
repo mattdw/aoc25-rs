@@ -1,4 +1,4 @@
-use std::{ascii, collections::HashMap, iter::zip};
+use std::iter::zip;
 
 use crate::Day;
 
@@ -33,7 +33,7 @@ fn parse(input: &str) -> Vec<(Op, Vec<Int>)> {
             .split_ascii_whitespace()
             .map(|c| c.trim())
             .collect();
-        let nums: Vec<Int> = l.iter().map(|c| c.parse::<Int>()).flatten().collect();
+        let nums: Vec<Int> = l.iter().flat_map(|c| c.parse::<Int>()).collect();
 
         // dbg!(&l, &nums);
         if nums.len() == l.len() {
@@ -70,8 +70,8 @@ fn parse2(input: &str) -> Vec<(Op, Vec<Int>)> {
     let mut curr_num: Int = 0;
 
     for c in (0..cols).rev() {
-        for l in 0..lines.len() {
-            let char = lines[l][c];
+        for line in &lines {
+            let char = line[c];
             match char {
                 0x20 => continue,
                 0x30..=0x39 => curr_num = curr_num * 10 + (char as Int - 0x30),
@@ -104,7 +104,7 @@ fn solve_and_sum(eqs: Vec<(Op, Vec<Int>)>) -> Int {
     eqs.into_iter()
         .map(|(op, nums)| match op {
             Op::Add => nums.into_iter().sum::<Int>(),
-            Op::Mult => nums.into_iter().fold(1, |a, b| a * b),
+            Op::Mult => nums.into_iter().product::<Int>(),
         })
         .sum::<Int>()
 }
