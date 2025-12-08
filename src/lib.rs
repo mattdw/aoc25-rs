@@ -5,7 +5,6 @@ use reqwest::header::COOKIE;
 use std::{env, fmt::Display};
 
 mod intmap;
-mod iterext;
 
 mod day01;
 pub use day01::Day1;
@@ -28,8 +27,8 @@ pub use day06::Day6;
 mod day07;
 pub use day07::Day7;
 
-// mod day08;
-// pub use day08::Day8;
+mod day08;
+pub use day08::Day8;
 
 // mod day09;
 // pub use day09::Day9;
