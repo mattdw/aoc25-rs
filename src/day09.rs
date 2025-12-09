@@ -1,4 +1,4 @@
-use std::cmp::minmax;
+use std::{cmp::minmax, mem::swap};
 
 use crate::{Day, intmap::Coord};
 
@@ -73,30 +73,27 @@ fn valid_rect(lines: &[[Coord<Int>; 2]], a: &Coord<Int>, b: &Coord<Int>) -> bool
 
     let insidex = xmin + 1..=xmax - 1;
     let insidey = ymin + 1..=ymax - 1;
-    let outsidex = xmin..=xmax;
-    let outsidey = ymin..=ymax;
 
     for seg in lines {
         let [l, r] = seg;
-        let horz = l.y == r.y;
 
-        let (insideperp, insidepar, outside, shared, lmin, lmax) = if horz {
-            let [lmin, lmax] = minmax(l.x, r.x);
-            (&insidey, &insidex, &outsidex, l.y, lmin, lmax)
-        } else {
-            let [lmin, lmax] = minmax(l.y, r.y);
-            (&insidex, &insidey, &outsidey, l.x, lmin, lmax)
-        };
-
-        if !insideperp.contains(&shared) {
-            continue;
-        }
-
-        if insidepar.contains(&lmin) || insidepar.contains(&lmax) {
+        if insidex.contains(&l.x) && insidey.contains(&l.y)
+            || insidex.contains(&r.x) && insidey.contains(&r.y)
+        {
             return false;
         }
 
-        if lmin <= *outside.start() && lmax >= *outside.end() {
+        if l.y == r.y
+            && insidey.contains(&l.y)
+            && ((l.x <= xmin && r.x >= xmax) || (r.x <= xmin && l.x >= xmax))
+        {
+            return false;
+        }
+
+        if l.x == r.x
+            && insidex.contains(&l.x)
+            && ((l.y <= ymin && r.y >= ymax) || (r.y <= ymin && l.y >= ymax))
+        {
             return false;
         }
     }
