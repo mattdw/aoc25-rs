@@ -1,5 +1,6 @@
 #![feature(get_disjoint_mut_helpers)]
-#![feature(ascii_char)]
+#![feature(cmp_minmax)]
+#![feature(iter_map_windows)]
 
 use reqwest::header::COOKIE;
 use std::{env, fmt::Display};
@@ -30,8 +31,8 @@ pub use day07::Day7;
 mod day08;
 pub use day08::Day8;
 
-// mod day09;
-// pub use day09::Day9;
+mod day09;
+pub use day09::Day9;
 
 // mod day10;
 // pub use day10::Day10;

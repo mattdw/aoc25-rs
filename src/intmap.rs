@@ -8,7 +8,7 @@ pub struct IntMap<T> {
 }
 
 #[allow(unused)]
-impl<T: Default + Clone> IntMap<T> {
+impl<T: Default + Clone + std::fmt::Debug + PartialEq + Eq> IntMap<T> {
     pub fn new(width: usize, height: usize) -> IntMap<T> {
         let cells = vec![T::default(); width * height];
         IntMap {
@@ -73,6 +73,26 @@ impl<T: Default + Clone> IntMap<T> {
         let idx = self.pt_to_idx(co);
         self.cells[idx as usize] = val;
     }
+
+    pub fn print(&self) {
+        for y in 0..self.height as isize {
+            for x in 0..self.width as isize {
+                let d = T::default();
+                if Some(&d) == self.get((x, y)) {
+                    print!(".")
+                } else {
+                    print!(
+                        "{}",
+                        format!("{:?}", self.get((x, y)).unwrap())
+                            .chars()
+                            .take(1)
+                            .collect::<String>()
+                    );
+                }
+            }
+            println!();
+        }
+    }
 }
 
 pub struct CoordIterator<'a, T> {
@@ -81,7 +101,7 @@ pub struct CoordIterator<'a, T> {
     y: isize,
 }
 
-impl<'a, T: Clone + Default> Iterator for CoordIterator<'a, T> {
+impl<'a, T: Clone + Default + std::fmt::Debug + PartialEq + Eq> Iterator for CoordIterator<'a, T> {
     type Item = (isize, isize);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -104,10 +124,10 @@ impl<'a, T: Clone + Default> Iterator for CoordIterator<'a, T> {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub struct Coord<T> {
-    x: T,
-    y: T,
+    pub x: T,
+    pub y: T,
 }
 
 #[allow(unused)]
