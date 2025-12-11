@@ -1,4 +1,4 @@
-use std::{cmp::minmax, mem::swap};
+use std::cmp::minmax;
 
 use crate::{Day, intmap::Coord};
 
